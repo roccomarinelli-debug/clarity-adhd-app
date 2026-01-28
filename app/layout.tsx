@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { EncryptionProvider } from "@/lib/encryption-context";
+import EncryptedApp from "@/components/EncryptedApp";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -42,7 +44,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased font-sans`}
       >
-        {children}
+        <EncryptionProvider>
+          <EncryptedApp>{children}</EncryptedApp>
+        </EncryptionProvider>
       </body>
     </html>
   );

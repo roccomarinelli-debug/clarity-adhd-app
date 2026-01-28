@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DndContext, DragEndEvent, closestCorners, PointerSensor, TouchSensor, KeyboardSensor, useSensor, useSensors, useDroppable } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useEncryption } from '@/lib/encryption-context';
 
 // Types
 interface Task {
@@ -937,50 +938,65 @@ export default function FlowStatePage() {
     }
   }, [pomodoroDate]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('flowStateData');
-    if (saved) {
-      const data = JSON.parse(saved);
-      // Only load tasks and completedTasks from localStorage, not habits (to allow for updates)
-      setTasks(data.tasks || []);
-      setCompletedTasks(data.completedTasks || []);
-      setDayJobFocus(data.dayJobFocus || '');
-      setDayJobReward(data.dayJobReward || '');
-      setDayJobCompleted(data.dayJobCompleted || {
-        pomodoro1: false,
-        pomodoro2: false,
-        pomodoro3: false,
-        signInMicrosoft: false,
-        phoneOutOfOffice: false,
-      });
+  // Get encrypted storage from context
+  const { storage } = useEncryption();
 
-      // Load pomodoro data
-      if (data.dailyPomodoroCount !== undefined) {
-        const today = new Date().toDateString();
-        if (data.pomodoroDate === today) {
-          setDailyPomodoroCount(data.dailyPomodoroCount);
-          setPomodoroDate(data.pomodoroDate);
+  // Load data from encrypted storage
+  useEffect(() => {
+    if (!storage) return;
+
+    const loadData = async () => {
+      try {
+        const saved = await storage.getItem('flowStateData');
+        if (saved) {
+          const data = JSON.parse(saved);
+          setTasks(data.tasks || []);
+          setCompletedTasks(data.completedTasks || []);
+          setDayJobFocus(data.dayJobFocus || '');
+          setDayJobReward(data.dayJobReward || '');
+          setDayJobCompleted(data.dayJobCompleted || {
+            pomodoro1: false,
+            pomodoro2: false,
+            pomodoro3: false,
+            signInMicrosoft: false,
+            phoneOutOfOffice: false,
+          });
+
+          if (data.dailyPomodoroCount !== undefined) {
+            const today = new Date().toDateString();
+            if (data.pomodoroDate === today) {
+              setDailyPomodoroCount(data.dailyPomodoroCount);
+              setPomodoroDate(data.pomodoroDate);
+            }
+          }
         }
+
+        const savedEpics = await storage.getItem('epicsData');
+        if (savedEpics) {
+          setEpics(JSON.parse(savedEpics));
+        }
+
+        const savedWeeklyGoals = await storage.getItem('weeklyGoals');
+        if (savedWeeklyGoals) {
+          setWeeklyGoals(JSON.parse(savedWeeklyGoals));
+        }
+
+        const savedDailyTasks = await storage.getItem('dailyTasks');
+        if (savedDailyTasks) {
+          setDailyTasks(JSON.parse(savedDailyTasks));
+        }
+      } catch (error) {
+        console.error('Error loading encrypted data:', error);
       }
-    }
+    };
 
-    const savedEpics = localStorage.getItem('epicsData');
-    if (savedEpics) {
-      setEpics(JSON.parse(savedEpics));
-    }
+    loadData();
+  }, [storage]);
 
-    const savedWeeklyGoals = localStorage.getItem('weeklyGoals');
-    if (savedWeeklyGoals) {
-      setWeeklyGoals(JSON.parse(savedWeeklyGoals));
-    }
-
-    const savedDailyTasks = localStorage.getItem('dailyTasks');
-    if (savedDailyTasks) {
-      setDailyTasks(JSON.parse(savedDailyTasks));
-    }
-  }, []);
-
+  // Save flow state data to encrypted storage
   useEffect(() => {
+    if (!storage) return;
+
     const data = {
       baselineHabits,
       tasks,
@@ -992,8 +1008,8 @@ export default function FlowStatePage() {
       pomodoroDate,
       date: new Date().toISOString().split('T')[0],
     };
-    localStorage.setItem('flowStateData', JSON.stringify(data));
-  }, [baselineHabits, tasks, completedTasks, dayJobFocus, dayJobReward, dayJobCompleted, dailyPomodoroCount, pomodoroDate]);
+    storage.setItem('flowStateData', JSON.stringify(data));
+  }, [storage, baselineHabits, tasks, completedTasks, dayJobFocus, dayJobReward, dayJobCompleted, dailyPomodoroCount, pomodoroDate]);
 
   const [activeTab, setActiveTab] = useState<'daily' | 'tasks' | 'goals'>('daily');
 
@@ -1058,17 +1074,23 @@ export default function FlowStatePage() {
   const [showCompletedGoals, setShowCompletedGoals] = useState(false);
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
 
+  // Save epics to encrypted storage
   useEffect(() => {
-    localStorage.setItem('epicsData', JSON.stringify(epics));
-  }, [epics]);
+    if (!storage) return;
+    storage.setItem('epicsData', JSON.stringify(epics));
+  }, [storage, epics]);
 
+  // Save weekly goals to encrypted storage
   useEffect(() => {
-    localStorage.setItem('weeklyGoals', JSON.stringify(weeklyGoals));
-  }, [weeklyGoals]);
+    if (!storage) return;
+    storage.setItem('weeklyGoals', JSON.stringify(weeklyGoals));
+  }, [storage, weeklyGoals]);
 
+  // Save daily tasks to encrypted storage
   useEffect(() => {
-    localStorage.setItem('dailyTasks', JSON.stringify(dailyTasks));
-  }, [dailyTasks]);
+    if (!storage) return;
+    storage.setItem('dailyTasks', JSON.stringify(dailyTasks));
+  }, [storage, dailyTasks]);
 
   // Add new epic
   const addEpic = () => {
