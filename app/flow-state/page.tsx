@@ -1982,102 +1982,92 @@ export default function FlowStatePage() {
           </>
         )}
 
-        {activeTab === 'daily' && (
-          <>
-
-        {/* Baseline Habits - Bordered Container */}
-        <div className="mb-4 mx-auto max-w-7xl">
-          {/* Date Carousel */}
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <button
-              onClick={() => {
-                const newDate = new Date(selectedDate);
-                newDate.setDate(newDate.getDate() - 1);
-                setSelectedDate(newDate);
-              }}
-              className="text-white/60 hover:text-white transition-colors p-1"
-            >
-              <span className="text-lg">←</span>
-            </button>
-
-            <div className="text-center">
-              <h2 className="text-base font-bold text-white tracking-wide">
-                {selectedDate.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'short',
-                  day: 'numeric'
-                })}
-              </h2>
-              {selectedDate.toDateString() === new Date().toDateString() && (
-                <span className="text-green-400 text-[10px] font-semibold">Today</span>
-              )}
-            </div>
-
-            <button
-              onClick={() => {
-                const newDate = new Date(selectedDate);
-                newDate.setDate(newDate.getDate() + 1);
-                setSelectedDate(newDate);
-              }}
-              className="text-white/60 hover:text-white transition-colors p-1"
-            >
-              <span className="text-lg">→</span>
-            </button>
-          </div>
-
-          <div className="relative bg-white/12 backdrop-blur-md rounded-[3rem] border-4 border-white/35 shadow-2xl p-4 overflow-hidden">
-            {/* Fireworks when all habits completed - contained */}
-            {allHabitsCompleted && <Fireworks />}
-
-            <div className="flex items-center justify-center gap-3 mb-2 relative z-30">
+        {/* Sticky Baseline Habits Bar - Always visible */}
+        <div className="sticky top-0 z-50 -mx-4 px-4 py-3 bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-pink-800/95 backdrop-blur-lg border-b border-white/10 shadow-xl">
+          <div className="max-w-7xl mx-auto">
+            {/* Compact layout for sticky bar */}
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              {/* Date selector */}
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white uppercase">
-                  {isWeekend ? 'Weekend Baseline' : 'Morning Baseline'}
-                </h3>
-                {!isWeekend && (
-                  <span className="text-white/60 text-[10px] font-medium">(5am-9am)</span>
-                )}
-              </div>
-              {allHabitsCompleted && (
-                <span className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-3 py-1 rounded-full text-[10px] font-bold animate-pulse shadow-xl">
-                  Ready to Flow! 🚀
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center justify-center gap-1.5 relative z-30 whitespace-nowrap">
-              {baselineHabits.map(habit => (
                 <button
-                  key={habit.id}
-                  onClick={() => toggleHabit(habit.id)}
-                  className={`relative transition-all duration-300 hover:scale-105 ${
-                    habit.completed ? 'scale-100' : ''
-                  }`}
+                  onClick={() => {
+                    const newDate = new Date(selectedDate);
+                    newDate.setDate(newDate.getDate() - 1);
+                    setSelectedDate(newDate);
+                  }}
+                  className="text-white/60 hover:text-white transition-colors p-1"
                 >
-                  <div className={`px-2.5 py-1.5 rounded-[1.5rem] flex items-center gap-1 shadow-lg ${
-                    habit.completed
-                      ? 'bg-gradient-to-br from-green-400 to-emerald-600 text-white'
-                      : 'bg-white/20 text-white border border-white/30'
-                  }`}>
-                    <span className="text-lg">{habit.icon}</span>
-                    <div className="font-semibold text-[11px] leading-tight whitespace-nowrap">
-                      {habit.label}
-                    </div>
-                    {habit.completed && (
-                      <div className="w-3.5 h-3.5 bg-white rounded-full flex items-center justify-center flex-shrink-0 ml-0.5">
-                        <span className="text-green-600 text-[10px] font-bold">✓</span>
-                      </div>
-                    )}
-                  </div>
+                  <span className="text-sm">←</span>
                 </button>
-              ))}
-              <div className="text-white text-[10px] font-semibold px-2.5 py-1.5 bg-white/15 rounded-full border border-white/30">
-                {completedHabitsCount}/{baselineHabits.length}
+                <div className="text-center min-w-[120px]">
+                  <span className="text-sm font-bold text-white">
+                    {selectedDate.toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </span>
+                  {selectedDate.toDateString() === new Date().toDateString() && (
+                    <span className="ml-2 text-green-400 text-[10px] font-semibold">Today</span>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    const newDate = new Date(selectedDate);
+                    newDate.setDate(newDate.getDate() + 1);
+                    setSelectedDate(newDate);
+                  }}
+                  className="text-white/60 hover:text-white transition-colors p-1"
+                >
+                  <span className="text-sm">→</span>
+                </button>
+              </div>
+
+              {/* Baseline habits */}
+              <div className="flex items-center gap-2 flex-wrap justify-center flex-1">
+                <span className="text-white/70 text-xs font-semibold uppercase hidden sm:inline">
+                  {isWeekend ? 'Weekend' : 'Morning'} Baseline:
+                </span>
+                {baselineHabits.map(habit => (
+                  <button
+                    key={habit.id}
+                    onClick={() => toggleHabit(habit.id)}
+                    className="transition-all duration-200 hover:scale-105 active:scale-95"
+                  >
+                    <div className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-md ${
+                      habit.completed
+                        ? 'bg-gradient-to-br from-green-400 to-emerald-600 text-white'
+                        : 'bg-white/15 text-white border border-white/30 hover:bg-white/25'
+                    }`}>
+                      <span className="text-base">{habit.icon}</span>
+                      <span className="font-medium text-xs whitespace-nowrap hidden sm:inline">
+                        {habit.label}
+                      </span>
+                      {habit.completed && (
+                        <span className="text-white text-xs">✓</span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Progress indicator */}
+              <div className="flex items-center gap-2">
+                <div className="text-white text-xs font-bold px-3 py-1.5 bg-white/15 rounded-full border border-white/30">
+                  {completedHabitsCount}/{baselineHabits.length}
+                </div>
+                {allHabitsCompleted && (
+                  <span className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-3 py-1.5 rounded-full text-xs font-bold animate-pulse shadow-lg whitespace-nowrap">
+                    Ready to Flow! 🚀
+                  </span>
+                )}
               </div>
             </div>
           </div>
         </div>
 
+        {activeTab === 'daily' && (
+          <>
         {/* Day Job Section */}
         <div ref={dayJobRef} className="mb-4 mx-auto max-w-7xl">
           <div className={`relative bg-white/10 backdrop-blur-md rounded-[3rem] border-4 shadow-2xl p-4 overflow-hidden transition-all duration-500 ${
