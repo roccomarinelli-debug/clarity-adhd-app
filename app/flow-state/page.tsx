@@ -940,6 +940,51 @@ export default function FlowStatePage() {
 
   // Get encrypted storage from context
   const { storage } = useEncryption();
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Default data used when no saved data exists
+  const defaultEpics: Epic[] = [
+    {
+      id: '1',
+      name: 'Move To Finland',
+      color: '#3B82F6',
+      subCategories: [
+        {
+          id: '1-1',
+          name: 'Finding a job',
+          tasks: []
+        }
+      ]
+    },
+    {
+      id: '2',
+      name: 'Move From Australia',
+      color: '#10B981',
+      subCategories: []
+    },
+    {
+      id: '3',
+      name: '85 Koetong Parade',
+      color: '#F59E0B',
+      subCategories: []
+    },
+    {
+      id: '4',
+      name: 'Roykka House',
+      color: '#8B5CF6',
+      subCategories: []
+    }
+  ];
+
+  const defaultWeeklyGoals: WeeklyGoal[] = [
+    { id: '1', text: 'Eliminate the rubbish pile at the front of the house', completed: false, priority: null },
+    { id: '2', text: 'Finish the restoration of the tall table', completed: false, priority: null },
+    { id: '3', text: 'List everything on market place and hand it over to the boys to run', completed: false, priority: null },
+    { id: '4', text: 'Prior to Hanna leaving, hall cupboard, Hanna\'s wardrobe, bathrooms', completed: false, priority: null },
+    { id: '5', text: 'Give notice to landlord', completed: false, priority: null },
+    { id: '6', text: 'Arrange payment of suncorp loan', completed: false, priority: null },
+    { id: '7', text: 'Rectify bond lodgement', completed: false, priority: null },
+  ];
 
   // Load data from encrypted storage
   useEffect(() => {
@@ -972,14 +1017,10 @@ export default function FlowStatePage() {
         }
 
         const savedEpics = await storage.getItem('epicsData');
-        if (savedEpics) {
-          setEpics(JSON.parse(savedEpics));
-        }
+        setEpics(savedEpics ? JSON.parse(savedEpics) : defaultEpics);
 
         const savedWeeklyGoals = await storage.getItem('weeklyGoals');
-        if (savedWeeklyGoals) {
-          setWeeklyGoals(JSON.parse(savedWeeklyGoals));
-        }
+        setWeeklyGoals(savedWeeklyGoals ? JSON.parse(savedWeeklyGoals) : defaultWeeklyGoals);
 
         const savedDailyTasks = await storage.getItem('dailyTasks');
         if (savedDailyTasks) {
@@ -987,6 +1028,8 @@ export default function FlowStatePage() {
         }
       } catch (error) {
         console.error('Error loading encrypted data:', error);
+      } finally {
+        setDataLoaded(true);
       }
     };
 
@@ -995,7 +1038,7 @@ export default function FlowStatePage() {
 
   // Save flow state data to encrypted storage
   useEffect(() => {
-    if (!storage) return;
+    if (!storage || !dataLoaded) return;
 
     const data = {
       baselineHabits,
@@ -1009,43 +1052,12 @@ export default function FlowStatePage() {
       date: new Date().toISOString().split('T')[0],
     };
     storage.setItem('flowStateData', JSON.stringify(data));
-  }, [storage, baselineHabits, tasks, completedTasks, dayJobFocus, dayJobReward, dayJobCompleted, dailyPomodoroCount, pomodoroDate]);
+  }, [storage, dataLoaded, baselineHabits, tasks, completedTasks, dayJobFocus, dayJobReward, dayJobCompleted, dailyPomodoroCount, pomodoroDate]);
 
   const [activeTab, setActiveTab] = useState<'daily' | 'tasks' | 'goals'>('daily');
 
-  // Epic Management State
-  const [epics, setEpics] = useState<Epic[]>([
-    {
-      id: '1',
-      name: 'Move To Finland',
-      color: '#3B82F6', // blue
-      subCategories: [
-        {
-          id: '1-1',
-          name: 'Finding a job',
-          tasks: []
-        }
-      ]
-    },
-    {
-      id: '2',
-      name: 'Move From Australia',
-      color: '#10B981', // green
-      subCategories: []
-    },
-    {
-      id: '3',
-      name: '85 Koetong Parade',
-      color: '#F59E0B', // amber
-      subCategories: []
-    },
-    {
-      id: '4',
-      name: 'Roykka House',
-      color: '#8B5CF6', // purple
-      subCategories: []
-    }
-  ]);
+  // Epic Management State (defaults loaded from storage, see loadData above)
+  const [epics, setEpics] = useState<Epic[]>([]);
   const [selectedEpic, setSelectedEpic] = useState<Epic | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<SubCategory | null>(null);
   const [showAddSubCategory, setShowAddSubCategory] = useState(false);
@@ -1056,16 +1068,8 @@ export default function FlowStatePage() {
   const [newEpicName, setNewEpicName] = useState('');
   const [newEpicColor, setNewEpicColor] = useState('#3B82F6');
 
-  // Weekly Focus State
-  const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>([
-    { id: '1', text: 'Eliminate the rubbish pile at the front of the house', completed: false, priority: null },
-    { id: '2', text: 'Finish the restoration of the tall table', completed: false, priority: null },
-    { id: '3', text: 'List everything on market place and hand it over to the boys to run', completed: false, priority: null },
-    { id: '4', text: 'Prior to Hanna leaving, hall cupboard, Hanna\'s wardrobe, bathrooms', completed: false, priority: null },
-    { id: '5', text: 'Give notice to landlord', completed: false, priority: null },
-    { id: '6', text: 'Arrange payment of suncorp loan', completed: false, priority: null },
-    { id: '7', text: 'Rectify bond lodgement', completed: false, priority: null },
-  ]);
+  // Weekly Focus State (defaults loaded from storage, see loadData above)
+  const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>([]);
   const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([]);
   const [showAddWeeklyGoal, setShowAddWeeklyGoal] = useState(false);
   const [showAddDailyTask, setShowAddDailyTask] = useState(false);
@@ -1074,23 +1078,23 @@ export default function FlowStatePage() {
   const [showCompletedGoals, setShowCompletedGoals] = useState(false);
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
 
-  // Save epics to encrypted storage
+  // Save epics to encrypted storage (only after data has been loaded)
   useEffect(() => {
-    if (!storage) return;
+    if (!storage || !dataLoaded) return;
     storage.setItem('epicsData', JSON.stringify(epics));
-  }, [storage, epics]);
+  }, [storage, dataLoaded, epics]);
 
-  // Save weekly goals to encrypted storage
+  // Save weekly goals to encrypted storage (only after data has been loaded)
   useEffect(() => {
-    if (!storage) return;
+    if (!storage || !dataLoaded) return;
     storage.setItem('weeklyGoals', JSON.stringify(weeklyGoals));
-  }, [storage, weeklyGoals]);
+  }, [storage, dataLoaded, weeklyGoals]);
 
-  // Save daily tasks to encrypted storage
+  // Save daily tasks to encrypted storage (only after data has been loaded)
   useEffect(() => {
-    if (!storage) return;
+    if (!storage || !dataLoaded) return;
     storage.setItem('dailyTasks', JSON.stringify(dailyTasks));
-  }, [storage, dailyTasks]);
+  }, [storage, dataLoaded, dailyTasks]);
 
   // Add new epic
   const addEpic = () => {
