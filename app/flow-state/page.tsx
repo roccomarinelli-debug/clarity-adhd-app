@@ -1976,6 +1976,13 @@ export default function FlowStatePage() {
           </>
         )}
 
+        {/* Fireworks celebration when all baseline habits completed */}
+        {allHabitsCompleted && (
+          <div className="fixed inset-0 pointer-events-none z-40">
+            <Fireworks />
+          </div>
+        )}
+
         {/* Sticky Baseline Habits Bar - Always visible */}
         <div className="sticky top-0 z-50 -mx-4 px-4 py-3 bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-pink-800/95 backdrop-blur-lg border-b border-white/10 shadow-xl">
           <div className="max-w-7xl mx-auto">
