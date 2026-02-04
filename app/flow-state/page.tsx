@@ -943,48 +943,9 @@ export default function FlowStatePage() {
   const [dataLoaded, setDataLoaded] = useState(false);
 
   // Default data used when no saved data exists
-  const defaultEpics: Epic[] = [
-    {
-      id: '1',
-      name: 'Move To Finland',
-      color: '#3B82F6',
-      subCategories: [
-        {
-          id: '1-1',
-          name: 'Finding a job',
-          tasks: []
-        }
-      ]
-    },
-    {
-      id: '2',
-      name: 'Move From Australia',
-      color: '#10B981',
-      subCategories: []
-    },
-    {
-      id: '3',
-      name: '85 Koetong Parade',
-      color: '#F59E0B',
-      subCategories: []
-    },
-    {
-      id: '4',
-      name: 'Roykka House',
-      color: '#8B5CF6',
-      subCategories: []
-    }
-  ];
+  const defaultEpics: Epic[] = [];
 
-  const defaultWeeklyGoals: WeeklyGoal[] = [
-    { id: '1', text: 'Eliminate the rubbish pile at the front of the house', completed: false, priority: null },
-    { id: '2', text: 'Finish the restoration of the tall table', completed: false, priority: null },
-    { id: '3', text: 'List everything on market place and hand it over to the boys to run', completed: false, priority: null },
-    { id: '4', text: 'Prior to Hanna leaving, hall cupboard, Hanna\'s wardrobe, bathrooms', completed: false, priority: null },
-    { id: '5', text: 'Give notice to landlord', completed: false, priority: null },
-    { id: '6', text: 'Arrange payment of suncorp loan', completed: false, priority: null },
-    { id: '7', text: 'Rectify bond lodgement', completed: false, priority: null },
-  ];
+  const defaultWeeklyGoals: WeeklyGoal[] = [];
 
   // Load data from encrypted storage
   useEffect(() => {
