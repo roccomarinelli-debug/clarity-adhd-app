@@ -1976,18 +1976,18 @@ export default function FlowStatePage() {
           </>
         )}
 
-        {/* Fireworks celebration when all baseline habits completed */}
-        {allHabitsCompleted && (
-          <div className="fixed inset-0 pointer-events-none z-40">
-            <Fireworks />
-          </div>
-        )}
+        {/* Baseline Habits Section */}
+        <div className="mb-4 mx-auto max-w-7xl">
+          <div className={`relative bg-white/10 backdrop-blur-md rounded-[3rem] border-4 shadow-2xl p-4 overflow-hidden transition-all duration-500 ${
+            allHabitsCompleted
+              ? 'border-green-400/50 animate-breathe animate-glow-pulse'
+              : 'border-white/30'
+          }`}>
+            {/* Fireworks inside the container when complete */}
+            {allHabitsCompleted && <Fireworks />}
 
-        {/* Sticky Baseline Habits Bar - Always visible */}
-        <div className="sticky top-0 z-50 -mx-4 px-4 py-3 bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-pink-800/95 backdrop-blur-lg border-b border-white/10 shadow-xl">
-          <div className="max-w-7xl mx-auto">
-            {/* Compact layout for sticky bar */}
-            <div className="flex items-center justify-between gap-4 flex-wrap">
+            {/* Compact layout */}
+            <div className="flex items-center justify-between gap-4 flex-wrap relative z-30">
               {/* Date selector */}
               <div className="flex items-center gap-2">
                 <button
