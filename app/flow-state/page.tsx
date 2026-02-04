@@ -1051,7 +1051,15 @@ export default function FlowStatePage() {
       pomodoroDate,
       date: new Date().toISOString().split('T')[0],
     };
-    storage.setItem('flowStateData', JSON.stringify(data));
+
+    const saveData = async () => {
+      try {
+        await storage.setItem('flowStateData', JSON.stringify(data));
+      } catch (error) {
+        console.error('Failed to save flow state data:', error);
+      }
+    };
+    saveData();
   }, [storage, dataLoaded, baselineHabits, tasks, completedTasks, dayJobFocus, dayJobReward, dayJobCompleted, dailyPomodoroCount, pomodoroDate]);
 
   const [activeTab, setActiveTab] = useState<'daily' | 'tasks' | 'goals'>('daily');
@@ -1081,19 +1089,40 @@ export default function FlowStatePage() {
   // Save epics to encrypted storage (only after data has been loaded)
   useEffect(() => {
     if (!storage || !dataLoaded) return;
-    storage.setItem('epicsData', JSON.stringify(epics));
+    const saveEpics = async () => {
+      try {
+        await storage.setItem('epicsData', JSON.stringify(epics));
+      } catch (error) {
+        console.error('Failed to save epics:', error);
+      }
+    };
+    saveEpics();
   }, [storage, dataLoaded, epics]);
 
   // Save weekly goals to encrypted storage (only after data has been loaded)
   useEffect(() => {
     if (!storage || !dataLoaded) return;
-    storage.setItem('weeklyGoals', JSON.stringify(weeklyGoals));
+    const saveWeeklyGoals = async () => {
+      try {
+        await storage.setItem('weeklyGoals', JSON.stringify(weeklyGoals));
+      } catch (error) {
+        console.error('Failed to save weekly goals:', error);
+      }
+    };
+    saveWeeklyGoals();
   }, [storage, dataLoaded, weeklyGoals]);
 
   // Save daily tasks to encrypted storage (only after data has been loaded)
   useEffect(() => {
     if (!storage || !dataLoaded) return;
-    storage.setItem('dailyTasks', JSON.stringify(dailyTasks));
+    const saveDailyTasks = async () => {
+      try {
+        await storage.setItem('dailyTasks', JSON.stringify(dailyTasks));
+      } catch (error) {
+        console.error('Failed to save daily tasks:', error);
+      }
+    };
+    saveDailyTasks();
   }, [storage, dataLoaded, dailyTasks]);
 
   // Add new epic
