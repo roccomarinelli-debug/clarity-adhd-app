@@ -7,6 +7,7 @@ export default function UnlockScreen() {
   const { isSetup, unlock, setup } = useEncryption();
   const [passphrase, setPassphrase] = useState('');
   const [confirmPassphrase, setConfirmPassphrase] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -17,7 +18,7 @@ export default function UnlockScreen() {
 
     if (isSetup) {
       // Unlock existing vault
-      const success = await unlock(passphrase);
+      const success = await unlock(passphrase, rememberMe);
       if (!success) {
         setError('Incorrect passphrase. Please try again.');
       }
@@ -33,7 +34,7 @@ export default function UnlockScreen() {
         setIsSubmitting(false);
         return;
       }
-      const success = await setup(passphrase);
+      const success = await setup(passphrase, rememberMe);
       if (!success) {
         setError('Failed to set up encryption. Please try again.');
       }
@@ -110,6 +111,16 @@ export default function UnlockScreen() {
               />
             </div>
           )}
+
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-600">Remember me on this device</span>
+          </label>
 
           {error && (
             <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm">

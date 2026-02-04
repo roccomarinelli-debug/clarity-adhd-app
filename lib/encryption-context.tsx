@@ -9,13 +9,15 @@ import {
   migrateToEncrypted,
 } from './crypto';
 
+const REMEMBER_KEY = 'clarity_remember';
+
 interface EncryptionContextType {
   isUnlocked: boolean;
   isSetup: boolean;
   isLoading: boolean;
   storage: EncryptedStorage | null;
-  unlock: (passphrase: string) => Promise<boolean>;
-  setup: (passphrase: string) => Promise<boolean>;
+  unlock: (passphrase: string, remember?: boolean) => Promise<boolean>;
+  setup: (passphrase: string, remember?: boolean) => Promise<boolean>;
   lock: () => void;
 }
 
@@ -29,22 +31,45 @@ export function EncryptionProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     // Check if encryption is already set up
-    setIsSetup(isEncryptionSetup());
+    const setup = isEncryptionSetup();
+    setIsSetup(setup);
+
+    // Try auto-unlock if remembered
+    if (setup) {
+      const remembered = localStorage.getItem(REMEMBER_KEY);
+      if (remembered) {
+        unlockEncryption(remembered).then((key) => {
+          if (key) {
+            const encStorage = new EncryptedStorage(key);
+            setStorage(encStorage);
+            setIsUnlocked(true);
+          } else {
+            // Invalid stored passphrase, clear it
+            localStorage.removeItem(REMEMBER_KEY);
+          }
+          setIsLoading(false);
+        });
+        return;
+      }
+    }
     setIsLoading(false);
   }, []);
 
-  const unlock = useCallback(async (passphrase: string): Promise<boolean> => {
+  const unlock = useCallback(async (passphrase: string, remember?: boolean): Promise<boolean> => {
     const key = await unlockEncryption(passphrase);
     if (key) {
       const encStorage = new EncryptedStorage(key);
       setStorage(encStorage);
       setIsUnlocked(true);
+      if (remember) {
+        localStorage.setItem(REMEMBER_KEY, passphrase);
+      }
       return true;
     }
     return false;
   }, []);
 
-  const setup = useCallback(async (passphrase: string): Promise<boolean> => {
+  const setup = useCallback(async (passphrase: string, remember?: boolean): Promise<boolean> => {
     try {
       const key = await initializeEncryption(passphrase);
       const encStorage = new EncryptedStorage(key);
@@ -55,6 +80,9 @@ export function EncryptionProvider({ children }: { children: React.ReactNode }) 
       setStorage(encStorage);
       setIsSetup(true);
       setIsUnlocked(true);
+      if (remember) {
+        localStorage.setItem(REMEMBER_KEY, passphrase);
+      }
       return true;
     } catch {
       return false;
@@ -64,6 +92,7 @@ export function EncryptionProvider({ children }: { children: React.ReactNode }) 
   const lock = useCallback(() => {
     setStorage(null);
     setIsUnlocked(false);
+    localStorage.removeItem(REMEMBER_KEY);
   }, []);
 
   return (
